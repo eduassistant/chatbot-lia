@@ -1,1 +1,593 @@
 # chatbot-lia
+
+Frontend de validación conversacional para **LIA**, el asistente estudiantil del proyecto Eduassistant.
+
+Este repositorio está pensado para que una persona en formación pueda avanzar con autonomía, pero con límites claros, entregas pequeñas y revisión semanal.
+
+---
+
+## 1) Objetivo del proyecto
+
+Construir un **frontend liviano y mantenible** que permita:
+
+- interactuar con el RAG de LIA mediante una interfaz de chat,
+- visualizar las fuentes recuperadas por el sistema,
+- capturar feedback del usuario sobre la utilidad de las respuestas,
+- validar el comportamiento conversacional del RAG sin acceder al código interno de Eduassistant,
+- dejar una base limpia para futura integración formal con Laravel.
+
+> Este proyecto **no busca reemplazar Eduassistant**.  
+> El objetivo es dejar un entorno de pruebas controlado, entendible y extensible.
+
+---
+
+## 2) Alcance del MVP
+
+### Incluye
+- interfaz de chat con historial de mensajes
+- integración con el endpoint `POST /chat` del backend RAG
+- visualización de fuentes y scores de similitud
+- indicador de carga durante el procesamiento
+- captura de feedback por respuesta
+- manejo básico de errores de red
+- despliegue en Vercel
+
+### No incluye en esta etapa
+- autenticación de usuarios
+- historial persistido entre sesiones
+- panel de administración
+- múltiples conversaciones simultáneas
+- internacionalización
+- observabilidad avanzada
+
+---
+
+## 3) Stack base
+
+- **Next.js 14+ (App Router)**
+- **React**
+- **TypeScript**
+- **Tailwind CSS**
+- **fetch nativo / axios** para comunicación con el RAG
+- **Vercel** para despliegue
+- **Jest + React Testing Library** para tests
+- **ESLint** para lint
+- **GitHub** para versionado, issues y PRs
+
+---
+
+## 4) Estructura sugerida del proyecto
+
+```text
+.
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── globals.css
+├── components/
+│   ├── chat/
+│   │   ├── ChatWindow.tsx
+│   │   ├── MessageList.tsx
+│   │   ├── MessageInput.tsx
+│   │   └── TypingIndicator.tsx
+│   ├── sources/
+│   │   └── SourcesPanel.tsx
+│   └── feedback/
+│       └── FeedbackButtons.tsx
+├── lib/
+│   ├── ragClient.ts
+│   └── types.ts
+├── hooks/
+│   └── useChat.ts
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   ├── workflows/
+│   ├── CODEOWNERS
+│   └── pull_request_template.md
+├── public/
+├── .env.local
+├── next.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+├── package.json
+└── README.md
+```
+
+---
+
+## 5) Cómo debe trabajar el pasante
+
+### Regla principal
+No trabajar "a lo ancho".  
+Se trabaja **por bloques pequeños, revisables y con cierre semanal**.
+
+### Flujo obligatorio
+1. Revisar el issue asignado.
+2. Confirmar qué se espera entregar.
+3. Crear rama nueva desde `main`.
+4. Implementar solo el alcance del issue.
+5. Probar localmente.
+6. Abrir Pull Request.
+7. Esperar revisión antes de continuar con cambios grandes.
+
+### Convención de ramas
+- `feature/nombre-corto`
+- `fix/nombre-corto`
+- `docs/nombre-corto`
+- `chore/nombre-corto`
+
+Ejemplos:
+```bash
+git checkout -b feature/setup-nextjs
+git checkout -b feature/chat-interface
+git checkout -b feature/sources-panel
+git checkout -b docs/update-readme
+```
+
+---
+
+## 6) Cronograma semanal de PRs
+
+> Cada semana debe terminar con **un PR funcional**, aunque sea pequeño.
+
+### Semana 1 — Setup base
+**Objetivo**
+- crear el proyecto Next.js,
+- configurar Tailwind y TypeScript,
+- desplegar skeleton en Vercel.
+
+**PR esperado**
+`feat: setup inicial Next.js + Vercel`
+
+**Entrega mínima**
+- app levantando localmente,
+- página raíz visible,
+- README con quick start.
+
+---
+
+### Semana 2 — Interfaz de chat
+**Objetivo**
+- construir el layout central de chat,
+- implementar caja de mensaje e historial,
+- mostrar mensajes del usuario y del asistente diferenciados.
+
+**PR esperado**
+`feat: chat interface`
+
+**Entrega mínima**
+- historial visible,
+- input funcional,
+- diseño mínimo aplicado.
+
+---
+
+### Semana 3 — Integración con el RAG
+**Objetivo**
+- crear el cliente HTTP hacia el backend RAG,
+- conectar el formulario con el endpoint `POST /chat`,
+- mostrar la respuesta real del asistente.
+
+**PR esperado**
+`feat: rag api client`
+
+**Entrega mínima**
+- mensaje enviado y respuesta mostrada,
+- variables de entorno configuradas,
+- manejo básico de error de red.
+
+---
+
+### Semana 4 — Visualización de fuentes
+**Objetivo**
+- mostrar las fuentes devueltas por el RAG,
+- presentar título, fragmento y score de similitud por fuente.
+
+**PR esperado**
+`feat: sources panel`
+
+**Entrega mínima**
+- panel de fuentes visible debajo de la respuesta,
+- al menos título y score por fuente.
+
+---
+
+### Semana 5 — Estados de carga y errores
+**Objetivo**
+- agregar indicador de carga mientras el RAG procesa,
+- mostrar mensajes de error comprensibles para el usuario,
+- deshabilitar el input durante el procesamiento.
+
+**PR esperado**
+`feat: loading and error states`
+
+**Entrega mínima**
+- spinner o indicador visible,
+- mensaje de error cuando falla la llamada,
+- input bloqueado durante la espera.
+
+---
+
+### Semana 6 — Feedback del usuario
+**Objetivo**
+- agregar botones de feedback por respuesta,
+- registrar si fue útil, insuficiente o requiere derivación.
+
+**PR esperado**
+`feat: feedback component`
+
+**Entrega mínima**
+- botones visibles por respuesta,
+- estado visual al confirmar feedback,
+- registro básico (console o endpoint si aplica).
+
+---
+
+### Semana 7 — Ajustes de UX y responsividad
+**Objetivo**
+- revisar experiencia en móvil,
+- pulir espaciado, tipografía y accesibilidad básica,
+- asegurar que el scroll del historial funcione correctamente.
+
+**PR esperado**
+`chore: ux polish`
+
+**Entrega mínima**
+- interfaz usable en pantallas pequeñas,
+- sin elementos cortados ni overflow visible.
+
+---
+
+### Semana 8 — Tests y calidad
+**Objetivo**
+- agregar tests básicos para componentes críticos,
+- verificar lint sin errores,
+- revisar build de producción.
+
+**PR esperado**
+`test: componentes críticos + lint`
+
+**Entrega mínima**
+- tests del componente de chat y del cliente RAG,
+- `npm run lint` sin errores,
+- `npm run build` exitoso.
+
+---
+
+### Semana 9 — Documentación y cierre
+**Objetivo**
+- actualizar README con instrucciones finales,
+- documentar variables de entorno,
+- preparar demo interna.
+
+**PR esperado**
+`docs: readme final + guía de despliegue`
+
+**Entrega mínima**
+- README completo,
+- instrucciones de Vercel actualizadas,
+- app desplegada y accesible.
+
+---
+
+### Semanas 10 a 12 — Buffer de consolidación
+Estas semanas quedan para:
+- correcciones pendientes,
+- deuda técnica,
+- mejoras de accesibilidad,
+- hardening de errores,
+- cierre documental.
+
+> Si el avance fue más lento, estas semanas sirven para completar lo esencial.  
+> Si el avance fue bueno, se usan para mejorar calidad.
+
+---
+
+## 7) Qué se revisará en cada PR
+
+Todo PR debe ser revisable en máximo 15 a 25 minutos.
+
+### El mentor revisará:
+- si cumple el objetivo del issue,
+- si el código es entendible,
+- si no mezcla demasiadas cosas,
+- si tiene forma clara de probarse,
+- si deja la base mejor que antes.
+
+### Un PR puede ser rechazado si:
+- no se puede probar,
+- mezcla demasiados cambios,
+- rompe el entorno,
+- está incompleto sin explicación,
+- no sigue el formato requerido.
+
+---
+
+## 8) Formato obligatorio de Pull Request
+
+Todo PR debe usar este formato:
+
+```markdown
+## ✅ Qué hice
+- ...
+
+## 🧪 Cómo probarlo
+- ...
+
+## ⚠️ Notas
+- ...
+
+## 🔗 Issue relacionado
+- Closes #ID
+```
+
+---
+
+## 9) Definition of Done por issue
+
+Un issue se considera terminado cuando:
+- el cambio está implementado,
+- fue probado localmente,
+- tiene PR abierto,
+- el mentor lo revisó,
+- fue mergeado a `main`,
+- si corresponde, la documentación fue actualizada.
+
+---
+
+## 10) Buenas prácticas de trabajo
+
+### Sí hacer
+- subir avances cada semana,
+- escribir componentes simples y enfocados,
+- comentar lo necesario, no todo,
+- separar lógica de presentación,
+- documentar decisiones de diseño importantes,
+- preguntar cuando algo no esté claro.
+
+### No hacer
+- trabajar 2 semanas sin abrir PR,
+- meter varios temas distintos en un mismo PR,
+- copiar componentes sin entenderlos,
+- introducir librerías grandes sin justificar,
+- cambiar arquitectura sin discutirlo.
+
+---
+
+## 11) Estándares mínimos de código
+
+- nombres claros en componentes, hooks y funciones,
+- componentes con una sola responsabilidad,
+- manejo básico de errores en llamadas al RAG,
+- configuración por variables de entorno,
+- nada sensible hardcodeado,
+- tests mínimos en piezas críticas,
+- tipado TypeScript donde sea razonable.
+
+---
+
+## 12) Cómo levantar el proyecto localmente
+
+### Requisitos
+- Node.js 18+
+- npm o pnpm
+- Git
+- acceso al backend RAG en ejecución (local o Render)
+
+### Pasos generales
+```bash
+git clone <repo-url>
+cd chatbot-lia
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+La aplicación estará disponible en `http://localhost:3000`.
+
+---
+
+## 13) Variables de entorno esperadas
+
+Crear `.env.local` en la raíz del proyecto:
+
+```env
+NEXT_PUBLIC_RAG_API_URL=https://<url-del-backend-rag>
+NEXT_PUBLIC_RAG_API_KEY=<tu_api_key>
+```
+
+> **No incluyas credenciales reales en el repositorio.** El archivo `.env.local` está excluido por `.gitignore`.  
+> En Vercel, configurar las mismas variables desde el panel del proyecto.
+
+---
+
+## 14) Integración con el backend RAG
+
+El chatbot consume el endpoint `POST /chat` del backend RAG.
+
+### Request
+
+```http
+POST /chat
+x-api-key: <tu_api_key>
+Content-Type: application/json
+
+{
+  "message": "Me siento muy sobrepasado con la universidad"
+}
+```
+
+### Response esperada
+
+```json
+{
+  "response": "Entiendo que te sientas sobrepasado...",
+  "sources": [
+    {
+      "document_id": 1,
+      "chunk_id": 10,
+      "chunk_index": 0,
+      "distance": 0.12
+    }
+  ]
+}
+```
+
+El campo `sources` se usa para renderizar el panel de fuentes junto a la respuesta.
+
+---
+
+## 15) Criterio de éxito al cierre de la práctica
+
+La práctica será exitosa si al terminar existe:
+- una interfaz de chat funcional y desplegada en Vercel,
+- integración real con el endpoint del RAG,
+- visualización de fuentes operativa,
+- feedback del usuario implementado,
+- documentación suficiente para continuidad.
+
+---
+
+## 16) Mensaje final para quien desarrolla
+
+No se espera perfección.
+Se espera orden, criterio, aprendizaje y avance real.
+
+La prioridad no es construir la interfaz más compleja,
+sino dejar una base limpia que el equipo pueda mantener y extender.
+
+---
+
+## 17) Quick start
+
+### Requisitos
+- Node.js 18+
+- npm
+
+### Levantar el proyecto
+
+```bash
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+---
+
+## 18) Cliente HTTP hacia el RAG
+
+El archivo `lib/ragClient.ts` centraliza la comunicación con el backend.
+
+### Función principal
+
+```ts
+sendMessage(message: string): Promise<ChatResponse>
+```
+
+### Estructura del tipo de respuesta
+
+```ts
+interface ChatResponse {
+  response: string;
+  sources: Source[];
+}
+
+interface Source {
+  document_id: number;
+  chunk_id: number;
+  chunk_index: number;
+  distance: number;
+}
+```
+
+### Manejo de errores
+
+El cliente debe capturar errores de red y respuestas con status distinto de 2xx, devolviendo un error tipado para que el componente pueda mostrarlo al usuario.
+
+---
+
+## 19) Hook de estado del chat
+
+El archivo `hooks/useChat.ts` gestiona el estado de la conversación y la llamada al cliente RAG.
+
+### Responsabilidades
+
+- mantener el historial de mensajes,
+- gestionar el estado de carga (`isLoading`),
+- gestionar el estado de error,
+- exponer la función `sendMessage`.
+
+### Ejemplo de uso en un componente
+
+```tsx
+const { messages, isLoading, error, sendMessage } = useChat();
+```
+
+---
+
+## 20) Componente ChatWindow
+
+El componente principal de la interfaz vive en `components/chat/ChatWindow.tsx`.
+
+### Responsabilidades
+
+- renderizar la lista de mensajes,
+- incluir el input de mensaje,
+- mostrar el indicador de carga,
+- mostrar errores cuando corresponda,
+- mantener el scroll al final del historial.
+
+---
+
+## 21) Panel de fuentes
+
+El componente `components/sources/SourcesPanel.tsx` muestra las fuentes devueltas por el RAG junto a cada respuesta.
+
+### Datos a mostrar por fuente
+
+- `document_id`
+- `chunk_id`
+- `distance` (score de similitud)
+
+El panel solo se renderiza cuando la respuesta incluye fuentes. Si el array viene vacío, no se muestra.
+
+---
+
+## 22) Componente de feedback
+
+El componente `components/feedback/FeedbackButtons.tsx` permite al usuario calificar cada respuesta.
+
+### Opciones esperadas
+
+- útil,
+- insuficiente,
+- requiere derivación.
+
+Al confirmar, el botón seleccionado debe mostrar un estado visual activo. El registro del feedback puede realizarse en consola en la primera versión, con extensión futura a un endpoint dedicado.
+
+---
+
+## 23) Despliegue en Vercel
+
+1. Conectar el repositorio a un proyecto en [Vercel](https://vercel.com).
+2. Configurar las variables de entorno `NEXT_PUBLIC_RAG_API_URL` y `NEXT_PUBLIC_RAG_API_KEY` en el panel de Vercel.
+3. Cada push a `main` dispara un deploy automático.
+
+### Validar el deploy
+
+- la página principal carga correctamente,
+- el chat puede enviar un mensaje real al RAG,
+- las fuentes se muestran en la respuesta,
+- los botones de feedback responden visualmente.
+
+---
+
+## 24) Relación con el repositorio del RAG
+
+Este frontend es independiente del backend. Para el contexto completo del sistema consultar el repositorio del RAG, que incluye:
+
+- pipeline de ingestión de documentos y chunking,
+- búsqueda semántica con pgvector,
+- endpoint `POST /chat` con autenticación por API key,
+- documentación Swagger en `/docs`.
+
