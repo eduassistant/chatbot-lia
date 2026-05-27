@@ -392,12 +392,12 @@ La aplicación estará disponible en `http://localhost:3000`.
 Crear `.env.local` en la raíz del proyecto:
 
 ```env
-NEXT_PUBLIC_RAG_API_URL=https://<url-del-backend-rag>
-NEXT_PUBLIC_RAG_API_KEY=<tu_api_key>
+RAG_API_URL=https://<url-del-backend-rag>
+RAG_API_KEY=<tu_api_key>
 ```
 
 > **No incluyas credenciales reales en el repositorio.** El archivo `.env.local` está excluido por `.gitignore`.  
-> En Vercel, configurar las mismas variables desde el panel del proyecto.
+> En Vercel, configurar estas variables como privadas, sin prefijo `NEXT_PUBLIC_`. La API key del RAG no debe exponerse en el navegador.
 
 ---
 
@@ -463,6 +463,14 @@ sino dejar una base limpia que el equipo pueda mantener y extender.
 ### Requisitos
 - Node.js 18+
 - npm
+
+### Stack instalado en la primera feature
+- Next.js 14+ con App Router
+- React
+- TypeScript
+- Tailwind CSS
+- Jest + React Testing Library
+- ESLint
 
 ### Levantar el proyecto
 
@@ -570,7 +578,7 @@ Al confirmar, el botón seleccionado debe mostrar un estado visual activo. El re
 ## 23) Despliegue en Vercel
 
 1. Conectar el repositorio a un proyecto en [Vercel](https://vercel.com).
-2. Configurar las variables de entorno `NEXT_PUBLIC_RAG_API_URL` y `NEXT_PUBLIC_RAG_API_KEY` en el panel de Vercel.
+2. Configurar las variables privadas `RAG_API_URL` y `RAG_API_KEY` en el panel de Vercel.
 3. Cada push a `main` dispara un deploy automático.
 
 ### Validar el deploy
@@ -591,3 +599,35 @@ Este frontend es independiente del backend. Para el contexto completo del sistem
 - endpoint `POST /chat` con autenticación por API key,
 - documentación Swagger en `/docs`.
 
+
+
+---
+
+## 25) Feature inicial: interfaz base de validación conversacional
+
+Esta primera implementación instala el stack tecnológico del frontend y crea una pantalla single page basada en el diseño aprobado en Figma.
+
+### Incluye
+- Next.js 14+ con App Router.
+- React + TypeScript.
+- Tailwind CSS.
+- Header con logo de Eduassistant y estado visual de conexión.
+- Card principal de conversación.
+- Mensaje inicial de LIA.
+- Ejemplos de consulta.
+- Input de mensaje.
+- Respuesta simulada para validar la experiencia de chat.
+- Panel de fuentes recuperadas.
+- Botones de feedback visuales por respuesta.
+- Test básico del componente `MessageInput`.
+
+### Nota técnica
+La llamada real a `POST /chat` queda para la siguiente issue. En esta feature, `lib/ragClient.ts` devuelve una respuesta simulada para validar estructura, diseño y flujo visual.
+
+### Seguridad de variables
+Aunque versiones iniciales del documento mencionaban variables `NEXT_PUBLIC_RAG_API_URL` y `NEXT_PUBLIC_RAG_API_KEY`, la integración final debe evitar exponer la API key del RAG en el navegador. La recomendación técnica es usar una ruta server-side en Next.js y variables privadas:
+
+```env
+RAG_API_URL=https://<url-del-backend-rag>
+RAG_API_KEY=<api-key-privada>
+```
