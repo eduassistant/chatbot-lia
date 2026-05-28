@@ -1,37 +1,79 @@
-import type { Source } from "./types";
+import type { ChatRequest, ChatResponse } from "./types";
 
-export interface ChatResponse {
-  response: string;
-  sources: Source[];
+export class RagClientError extends Error {
+  status?: number;
+
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "RagClientError";
+    this.status = status;
+  }
+}
+
+function isChatResponse(value: unknown): value is ChatResponse {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const response = value as Partial<ChatResponse>;
+
+  return typeof response.response === "string" && Array.isArray(response.sources);
+}
+
+function getErrorMessage(payload: unknown, fallback: string) {
+  if (payload && typeof payload === "object" && "error" in payload) {
+    const error = (payload as { error?: unknown }).error;
+    if (typeof error === "string" && error.trim()) {
+      return error;
+    }
+  }
+
+  return fallback;
 }
 
 export async function sendMessage(message: string): Promise<ChatResponse> {
-  // Esta primera feature usa respuesta simulada para validar la UI.
-  // La integración real con rag-lia se conectará en la siguiente issue.
-  await new Promise((resolve) => setTimeout(resolve, 650));
+  const trimmedMessage = message.trim();
 
-  return {
-    response:
-      "Entiendo que te sientas así. Cuando las obligaciones se acumulan, puede ayudar dividir lo urgente de lo importante y pedir apoyo antes de que la situación avance. Podemos empezar por ordenar tus materias, fechas clave y el primer paso más pequeño para hoy.",
-    sources: [
-      {
-        documentId: 1,
-        chunkId: 10,
-        chunkIndex: 0,
-        title: "Guía de bienestar estudiantil",
-        fragment:
-          "Ante situaciones de estrés académico, se recomienda solicitar orientación temprana y organizar prioridades.",
-        score: 0.12,
-      },
-      {
-        documentId: 2,
-        chunkId: 18,
-        chunkIndex: 1,
-        title: "Recursos de permanencia académica",
-        fragment:
-          "Los estudiantes pueden acceder a espacios de acompañamiento para revisar dificultades de cursado.",
-        score: 0.18,
-      },
-    ],
+  if (!trimmedMessage) {
+    throw new RagClientError("El mensaje no puede estar vacío.");
+  }
+
+  const requestPayload: ChatRequest = {
+    message: trimmedMessage,
   };
+
+  let response: Response;
+
+  try {
+    response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestPayload),
+    });
+  } catch {
+    throw new RagClientError("No pudimos conectar con el RAG. Revisa el backend o intenta nuevamente.");
+  }
+
+  let payload: unknown = null;
+
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    throw new RagClientError(
+      getErrorMessage(payload, "El RAG no pudo procesar la consulta. Intenta nuevamente."),
+      response.status,
+    );
+  }
+
+  if (!isChatResponse(payload)) {
+    throw new RagClientError("El RAG respondió con un formato inesperado.");
+  }
+
+  return payload;
 }
