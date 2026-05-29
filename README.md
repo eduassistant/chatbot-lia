@@ -86,7 +86,7 @@ Construir un **frontend liviano y mantenible** que permita:
 │   └── pull_request_template.md
 ├── public/
 ├── .env.local
-├── next.config.ts
+├── next.config.mjs
 ├── tailwind.config.ts
 ├── tsconfig.json
 ├── package.json
@@ -403,13 +403,12 @@ RAG_API_KEY=<tu_api_key>
 
 ## 14) Integración con el backend RAG
 
-El chatbot consume el endpoint `POST /chat` del backend RAG.
+El chatbot consume el endpoint interno `POST /api/chat` de Next.js. Esa ruta server-side reenvía la consulta al endpoint `POST /chat` del backend RAG usando la API key privada configurada en variables de entorno.
 
 ### Request
 
 ```http
-POST /chat
-x-api-key: <tu_api_key>
+POST /api/chat
 Content-Type: application/json
 
 {
@@ -417,23 +416,25 @@ Content-Type: application/json
 }
 ```
 
-### Response esperada
+### Response esperada en el frontend
 
 ```json
 {
   "response": "Entiendo que te sientas sobrepasado...",
   "sources": [
     {
-      "document_id": 1,
-      "chunk_id": 10,
-      "chunk_index": 0,
-      "distance": 0.12
+      "documentId": 1,
+      "chunkId": 10,
+      "chunkIndex": 0,
+      "title": "Documento #1",
+      "fragment": "Fragmento #10",
+      "score": 0.12
     }
   ]
 }
 ```
 
-El campo `sources` se usa para renderizar el panel de fuentes junto a la respuesta.
+El campo `sources` se normaliza en la ruta interna de Next.js para renderizar el panel de fuentes junto a la respuesta. Mientras `rag-lia` no devuelva título o fragmento, el front muestra valores fallback como `Documento #ID` y `Fragmento #ID`.
 
 ---
 
@@ -484,7 +485,7 @@ npm run dev
 
 ## 18) Cliente HTTP hacia el RAG
 
-El archivo `lib/ragClient.ts` centraliza la comunicación con el backend.
+El archivo `lib/ragClient.ts` centraliza la comunicación del cliente con la ruta interna `/api/chat`. La API key del RAG nunca se usa desde el navegador.
 
 ### Función principal
 
@@ -501,10 +502,12 @@ interface ChatResponse {
 }
 
 interface Source {
-  document_id: number;
-  chunk_id: number;
-  chunk_index: number;
-  distance: number;
+  documentId: number;
+  chunkId: number;
+  chunkIndex: number;
+  title: string;
+  fragment: string;
+  score: number;
 }
 ```
 
@@ -553,9 +556,11 @@ El componente `components/sources/SourcesPanel.tsx` muestra las fuentes devuelta
 
 ### Datos a mostrar por fuente
 
-- `document_id`
-- `chunk_id`
-- `distance` (score de similitud)
+- `documentId`
+- `chunkId`
+- `title`
+- `fragment`
+- `score`
 
 El panel solo se renderiza cuando la respuesta incluye fuentes. Si el array viene vacío, no se muestra.
 
@@ -631,3 +636,47 @@ Aunque versiones iniciales del documento mencionaban variables `NEXT_PUBLIC_RAG_
 RAG_API_URL=https://<url-del-backend-rag>
 RAG_API_KEY=<api-key-privada>
 ```
+
+---
+
+## 26) Integración inicial con `rag-lia`
+
+Esta feature conecta la UI del chat con el backend RAG usando una ruta interna server-side de Next.js.
+
+### Incluye
+- Nueva ruta `POST /api/chat` en `app/api/chat/route.ts`.
+- Cliente HTTP real en `lib/ragClient.ts`.
+- Envío de mensajes reales desde el hook `useChat`.
+- Manejo de errores de red, configuración faltante y respuestas no exitosas.
+- Normalización de fuentes desde el formato actual de `rag-lia` (`document_id`, `chunk_id`, `chunk_index`, `distance`) al formato usado por la UI (`documentId`, `chunkId`, `chunkIndex`, `title`, `fragment`, `score`).
+- Tests básicos del cliente HTTP y de la ruta interna.
+
+### Seguridad
+El navegador no llama directamente al backend RAG ni conoce la API key. El flujo queda así:
+
+```text
+Browser
+  → POST /api/chat en Next.js
+  → POST /chat en rag-lia con x-api-key privada
+```
+
+Variables requeridas en `.env.local`:
+
+```env
+RAG_API_URL=http://localhost:8000
+RAG_API_KEY=changeme
+```
+
+### Validación local sugerida
+
+1. Levantar `rag-lia` y su base de datos según el README del backend.
+2. Verificar que `POST /chat` funciona con `x-api-key`.
+3. En `chatbot-lia`, crear `.env.local` desde `.env.example`.
+4. Ejecutar:
+
+```bash
+npm run dev
+```
+
+5. Enviar un mensaje desde `http://localhost:3000` y verificar que la respuesta se renderiza en el historial.
+

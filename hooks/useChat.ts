@@ -59,8 +59,13 @@ export function useChat() {
       };
 
       setMessages((currentMessages) => [...currentMessages, assistantMessage]);
-    } catch {
-      setError("No pudimos conectar con el RAG. Revisa el backend o intenta nuevamente.");
+    } catch (unknownError) {
+      const errorMessage =
+        unknownError instanceof Error
+          ? unknownError.message
+          : "No pudimos conectar con el RAG. Revisa el backend o intenta nuevamente.";
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
