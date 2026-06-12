@@ -20,7 +20,7 @@ import { POST } from "../route";
 
 const mockedFetch = jest.fn();
 
-describe("POST /api/chat", () => {
+describe("POST /api/feedback", () => {
   const previousEnv = process.env;
   const previousFetch = global.fetch;
 
@@ -41,29 +41,23 @@ describe("POST /api/chat", () => {
     global.fetch = previousFetch;
   });
 
-  it("reenvía el mensaje al backend RAG y normaliza las fuentes", async () => {
+  it("reenvía el feedback al backend RAG y normaliza la respuesta", async () => {
     mockedFetch.mockResolvedValue(
       new Response(
         JSON.stringify({
-          response: "Respuesta real del RAG",
-          sources: [
-            {
-              document_id: 1,
-              chunk_id: 10,
-              chunk_index: 0,
-              distance: 0.12,
-            },
-          ],
+          id: 7,
           trace_id: "trace-123",
+          feedback: "useful",
+          message: "Feedback registrado correctamente.",
         }),
         { status: 200, headers: { "Content-Type": "application/json" } },
       ),
     );
 
-    const request = new Request("http://localhost:3000/api/chat", {
+    const request = new Request("http://localhost:3000/api/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "¿Cómo puedo organizarme mejor?" }),
+      body: JSON.stringify({ traceId: "trace-123", feedback: "useful", source: "chatbot-lia" }),
     });
 
     const response = await POST(request);
@@ -71,44 +65,40 @@ describe("POST /api/chat", () => {
 
     expect(response.status).toBe(200);
     expect(mockedFetch).toHaveBeenCalledWith(
-      "http://localhost:8000/chat",
+      "http://localhost:8000/feedback",
       expect.objectContaining({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "x-api-key": "test-api-key",
         },
-        body: JSON.stringify({ message: "¿Cómo puedo organizarme mejor?" }),
+        body: JSON.stringify({
+          trace_id: "trace-123",
+          feedback: "useful",
+          source: "chatbot-lia",
+        }),
       }),
     );
     expect(data).toEqual({
-      response: "Respuesta real del RAG",
-      sources: [
-        {
-          documentId: 1,
-          chunkId: 10,
-          chunkIndex: 0,
-          title: "Documento #1",
-          fragment: "Fragmento #10",
-          score: 0.12,
-        },
-      ],
+      id: 7,
       traceId: "trace-123",
+      feedback: "useful",
+      message: "Feedback registrado correctamente.",
     });
   });
 
-  it("devuelve error 400 cuando el mensaje está vacío", async () => {
-    const request = new Request("http://localhost:3000/api/chat", {
+  it("devuelve error 400 cuando el feedback no es válido", async () => {
+    const request = new Request("http://localhost:3000/api/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "   " }),
+      body: JSON.stringify({ traceId: "trace-123", feedback: "human_help" }),
     });
 
     const response = await POST(request);
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toBe("El mensaje no puede estar vacío.");
+    expect(data.error).toBe("El feedback debe incluir traceId y un valor válido.");
     expect(mockedFetch).not.toHaveBeenCalled();
   });
 });

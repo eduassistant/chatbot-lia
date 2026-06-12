@@ -430,7 +430,8 @@ Content-Type: application/json
       "fragment": "Fragmento #10",
       "score": 0.12
     }
-  ]
+  ],
+  "traceId": "trace-demo-001"
 }
 ```
 
@@ -499,6 +500,7 @@ sendMessage(message: string): Promise<ChatResponse>
 interface ChatResponse {
   response: string;
   sources: Source[];
+  traceId?: string;
 }
 
 interface Source {
@@ -679,4 +681,60 @@ npm run dev
 ```
 
 5. Enviar un mensaje desde `http://localhost:3000` y verificar que la respuesta se renderiza en el historial.
+
+
+---
+
+## 27) Integración de feedback con `rag-lia`
+
+Esta feature conecta los botones de feedback del chat con el endpoint `POST /feedback` del backend RAG.
+
+### Incluye
+- Nueva ruta interna `POST /api/feedback` en `chatbot-lia`.
+- Nuevo cliente HTTP `lib/feedbackClient.ts`.
+- Uso del `traceId` devuelto por `/api/chat` para asociar el feedback con la respuesta del RAG.
+- Envío seguro del feedback al backend mediante `RAG_API_URL` y `RAG_API_KEY` privadas.
+- Mapeo de botones:
+  - `Útil` → `useful`
+  - `Insuficiente` → `insufficient`
+  - `Necesito hablar con alguien` → `needs_human_support`
+- Estados visuales por respuesta:
+  - enviando,
+  - enviado,
+  - error.
+- Tests del cliente HTTP y de la ruta interna.
+
+### Flujo seguro
+
+```text
+Browser
+  → POST /api/feedback en Next.js
+  → POST /feedback en rag-lia con x-api-key privada
+```
+
+La API key del RAG no se expone en el navegador.
+
+### Request interno
+
+```http
+POST /api/feedback
+Content-Type: application/json
+
+{
+  "traceId": "trace-demo-001",
+  "feedback": "useful",
+  "source": "chatbot-lia"
+}
+```
+
+### Response esperada
+
+```json
+{
+  "id": 1,
+  "traceId": "trace-demo-001",
+  "feedback": "useful",
+  "message": "Feedback registrado correctamente."
+}
+```
 

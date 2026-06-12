@@ -17,7 +17,11 @@ function isChatResponse(value: unknown): value is ChatResponse {
 
   const response = value as Partial<ChatResponse>;
 
-  return typeof response.response === "string" && Array.isArray(response.sources);
+  return (
+    typeof response.response === "string" &&
+    Array.isArray(response.sources) &&
+    (response.traceId === undefined || typeof response.traceId === "string")
+  );
 }
 
 function getErrorMessage(payload: unknown, fallback: string) {

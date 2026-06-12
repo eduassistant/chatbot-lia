@@ -75,6 +75,7 @@ function normalizeRagResponse(payload: unknown): ChatResponse | null {
   return {
     response: payload.response,
     sources,
+    traceId: typeof payload.trace_id === "string" ? payload.trace_id : undefined,
   };
 }
 

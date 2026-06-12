@@ -23,6 +23,7 @@ describe("ragClient", () => {
               score: 0.12,
             },
           ],
+          traceId: "trace-123",
         }),
         { status: 200, headers: { "Content-Type": "application/json" } },
       ),
@@ -40,6 +41,7 @@ describe("ragClient", () => {
     );
     expect(result.response).toBe("Respuesta del RAG");
     expect(result.sources).toHaveLength(1);
+    expect(result.traceId).toBe("trace-123");
   });
 
   it("lanza un error tipado cuando el endpoint interno responde con error", async () => {

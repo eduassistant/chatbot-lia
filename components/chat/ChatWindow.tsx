@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChatMessage } from "@/lib/types";
+import type { ChatMessage, FeedbackValue } from "@/lib/types";
 import { ExamplePrompts } from "./ExamplePrompts";
 import { MessageInput } from "./MessageInput";
 import { MessageList } from "./MessageList";
@@ -11,9 +11,16 @@ interface ChatWindowProps {
   isLoading: boolean;
   error: string | null;
   onSendMessage: (message: string) => void;
+  onSubmitFeedback: (messageId: string, feedback: FeedbackValue) => void;
 }
 
-export function ChatWindow({ messages, isLoading, error, onSendMessage }: ChatWindowProps) {
+export function ChatWindow({
+  messages,
+  isLoading,
+  error,
+  onSendMessage,
+  onSubmitFeedback,
+}: ChatWindowProps) {
   return (
     <section className="flex min-h-[calc(100vh-150px)] flex-col rounded-2xl border border-border bg-white shadow-soft">
       <div className="border-b border-border px-5 py-5 sm:px-6">
@@ -21,7 +28,7 @@ export function ChatWindow({ messages, isLoading, error, onSendMessage }: ChatWi
       </div>
 
       <div className="scrollbar-thin-soft flex-1 overflow-y-auto px-5 py-5 sm:px-6">
-        <MessageList messages={messages} />
+        <MessageList messages={messages} onSubmitFeedback={onSubmitFeedback} />
         <ExamplePrompts onSelectPrompt={onSendMessage} disabled={isLoading} />
         {isLoading ? <TypingIndicator /> : null}
         {error ? (
