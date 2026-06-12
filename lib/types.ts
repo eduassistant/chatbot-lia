@@ -1,6 +1,14 @@
 export type ChatRole = "user" | "assistant";
 
-export type FeedbackValue = "useful" | "insufficient" | "human_help";
+export type FeedbackValue = "useful" | "insufficient" | "needs_human_support";
+
+export type FeedbackStatus = "idle" | "sending" | "sent" | "error";
+
+export interface FeedbackState {
+  value: FeedbackValue | null;
+  status: FeedbackStatus;
+  error?: string;
+}
 
 export interface Source {
   documentId: number;
@@ -16,7 +24,9 @@ export interface ChatMessage {
   role: ChatRole;
   content: string;
   sources?: Source[];
+  traceId?: string;
   isInitial?: boolean;
+  feedback?: FeedbackState;
 }
 
 export interface ChatRequest {
@@ -26,6 +36,21 @@ export interface ChatRequest {
 export interface ChatResponse {
   response: string;
   sources: Source[];
+  traceId?: string;
+}
+
+export interface FeedbackRequest {
+  traceId: string;
+  feedback: FeedbackValue;
+  comment?: string;
+  source?: string;
+}
+
+export interface FeedbackResponse {
+  id: number;
+  traceId: string;
+  feedback: FeedbackValue;
+  message: string;
 }
 
 export interface RagSource {
@@ -43,4 +68,12 @@ export interface RagSource {
 export interface RagChatResponse {
   response: string;
   sources?: RagSource[];
+  trace_id?: string;
+}
+
+export interface RagFeedbackResponse {
+  id: number;
+  trace_id: string;
+  feedback: FeedbackValue;
+  message: string;
 }

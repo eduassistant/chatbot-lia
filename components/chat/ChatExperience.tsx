@@ -14,6 +14,7 @@ export function ChatExperience() {
         isLoading={chat.isLoading}
         error={chat.error}
         onSendMessage={chat.sendMessage}
+        onSubmitFeedback={chat.submitFeedback}
       />
       <SourcesPanel sources={chat.latestSources} />
     </section>
