@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import type { ChatRequest, ChatResponse, RagChatResponse, RagSource, Source } from "@/lib/types";
+import type {
+  ChatRequest,
+  ChatResponse,
+  RagChatResponse,
+  RagSource,
+  Source,
+} from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -76,6 +82,7 @@ function normalizeRagResponse(payload: unknown): ChatResponse | null {
     response: payload.response,
     sources,
     traceId: typeof payload.trace_id === "string" ? payload.trace_id : undefined,
+    caseId: typeof payload.case_id === "string" ? payload.case_id : undefined,
   };
 }
 

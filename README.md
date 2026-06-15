@@ -738,3 +738,45 @@ Content-Type: application/json
 }
 ```
 
+
+---
+
+## 28) UX de case management en feedback
+
+Esta mejora complementa la issue `#37` de `rag-lia` y permite que `chatbot-lia` interprete el `case_id` opcional devuelto por el backend cuando un feedback genera un caso escalado.
+
+Objetivo:
+
+- mantener el flujo seguro mediante `/api/feedback` server-side;
+- no exponer `RAG_API_KEY` en el navegador;
+- mostrar un mensaje especial cuando el usuario selecciona `Necesito hablar con alguien`;
+- conservar el comportamiento normal para `Útil` e `Insuficiente`.
+
+Flujo esperado:
+
+```text
+Usuario presiona "Necesito hablar con alguien"
+→ chatbot-lia POST /api/feedback
+→ rag-lia POST /feedback
+→ rag-lia crea caso si corresponde
+→ chatbot-lia muestra solicitud registrada para seguimiento humano
+```
+
+Archivos principales:
+
+```text
+app/api/feedback/route.ts
+components/feedback/FeedbackButtons.tsx
+components/chat/MessageBubble.tsx
+hooks/useChat.ts
+lib/feedbackClient.ts
+lib/types.ts
+```
+
+Validación local:
+
+```bash
+npm run lint
+npm run build
+npm test
+```

@@ -23,12 +23,19 @@ export function MessageBubble({ message, onSubmitFeedback }: MessageBubbleProps)
           {message.content}
         </div>
 
+        {!isUser && message.caseId ? (
+          <p className="mt-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
+            Se registró una solicitud para seguimiento humano. Caso: {message.caseId}.
+          </p>
+        ) : null}
+
         {!isUser && !message.isInitial ? (
           <div className="mt-2">
             <FeedbackButtons
               selectedFeedback={feedback.value}
               status={feedback.status}
               error={feedback.error}
+              caseId={feedback.caseId}
               disabled={!message.traceId}
               onSubmitFeedback={(feedbackValue) => onSubmitFeedback(message.id, feedbackValue)}
             />

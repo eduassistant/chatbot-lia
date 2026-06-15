@@ -8,6 +8,7 @@ export interface FeedbackState {
   value: FeedbackValue | null;
   status: FeedbackStatus;
   error?: string;
+  caseId?: string;
 }
 
 export interface Source {
@@ -25,6 +26,7 @@ export interface ChatMessage {
   content: string;
   sources?: Source[];
   traceId?: string;
+  caseId?: string;
   isInitial?: boolean;
   feedback?: FeedbackState;
 }
@@ -37,6 +39,7 @@ export interface ChatResponse {
   response: string;
   sources: Source[];
   traceId?: string;
+  caseId?: string;
 }
 
 export interface FeedbackRequest {
@@ -51,6 +54,7 @@ export interface FeedbackResponse {
   traceId: string;
   feedback: FeedbackValue;
   message: string;
+  caseId?: string;
 }
 
 export interface RagSource {
@@ -69,6 +73,7 @@ export interface RagChatResponse {
   response: string;
   sources?: RagSource[];
   trace_id?: string;
+  case_id?: string | null;
 }
 
 export interface RagFeedbackResponse {
@@ -76,4 +81,5 @@ export interface RagFeedbackResponse {
   trace_id: string;
   feedback: FeedbackValue;
   message: string;
+  case_id?: string | null;
 }

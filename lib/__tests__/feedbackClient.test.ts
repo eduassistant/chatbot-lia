@@ -16,6 +16,7 @@ describe("feedbackClient", () => {
           traceId: "trace-123",
           feedback: "useful",
           message: "Feedback registrado correctamente.",
+          caseId: "case-123",
         }),
         { status: 200, headers: { "Content-Type": "application/json" } },
       ),
@@ -41,6 +42,7 @@ describe("feedbackClient", () => {
     );
     expect(result.traceId).toBe("trace-123");
     expect(result.feedback).toBe("useful");
+    expect(result.caseId).toBe("case-123");
   });
 
   it("lanza un error tipado cuando el endpoint interno responde con error", async () => {

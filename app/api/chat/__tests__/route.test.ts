@@ -55,6 +55,7 @@ describe("POST /api/chat", () => {
             },
           ],
           trace_id: "trace-123",
+          case_id: "case-chat-123",
         }),
         { status: 200, headers: { "Content-Type": "application/json" } },
       ),
@@ -94,6 +95,7 @@ describe("POST /api/chat", () => {
         },
       ],
       traceId: "trace-123",
+      caseId: "case-chat-123",
     });
   });
 
