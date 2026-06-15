@@ -12,13 +12,25 @@ interface FeedbackButtonsProps {
   selectedFeedback: FeedbackValue | null;
   status: FeedbackStatus;
   error?: string;
+  caseId?: string;
   disabled?: boolean;
   onSubmitFeedback: (feedback: FeedbackValue) => void;
 }
 
-function getStatusMessage(status: FeedbackStatus, error?: string) {
+function getStatusMessage(
+  status: FeedbackStatus,
+  selectedFeedback: FeedbackValue | null,
+  error?: string,
+  caseId?: string,
+) {
   if (status === "sending") {
     return "Enviando feedback...";
+  }
+
+  if (status === "sent" && selectedFeedback === "needs_human_support") {
+    return caseId
+      ? `Solicitud registrada para seguimiento humano. Caso: ${caseId}.`
+      : "Solicitud registrada para seguimiento humano.";
   }
 
   if (status === "sent") {
@@ -36,10 +48,11 @@ export function FeedbackButtons({
   selectedFeedback,
   status,
   error,
+  caseId,
   disabled = false,
   onSubmitFeedback,
 }: FeedbackButtonsProps) {
-  const statusMessage = getStatusMessage(status, error);
+  const statusMessage = getStatusMessage(status, selectedFeedback, error, caseId);
 
   return (
     <div className="space-y-1.5">
@@ -68,7 +81,11 @@ export function FeedbackButtons({
       </div>
 
       {statusMessage ? (
-        <p className={`text-xs ${status === "error" ? "text-red-600" : "text-muted-foreground"}`}>
+        <p
+          className={`text-xs ${
+            status === "error" ? "text-red-600" : "text-muted-foreground"
+          }`}
+        >
           {statusMessage}
         </p>
       ) : null}

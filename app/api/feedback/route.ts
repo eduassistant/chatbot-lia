@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import type { FeedbackRequest, FeedbackResponse, FeedbackValue, RagFeedbackResponse } from "@/lib/types";
+import type {
+  FeedbackRequest,
+  FeedbackResponse,
+  FeedbackValue,
+  RagFeedbackResponse,
+} from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -96,6 +101,7 @@ function normalizeRagFeedbackResponse(payload: unknown): FeedbackResponse | null
     traceId: payload.trace_id,
     feedback: payload.feedback as FeedbackValue,
     message: payload.message,
+    caseId: typeof payload.case_id === "string" ? payload.case_id : undefined,
   };
 }
 

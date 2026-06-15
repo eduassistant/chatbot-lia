@@ -80,6 +80,7 @@ export function useChat() {
           content: ragResponse.response,
           sources: ragResponse.sources,
           traceId: ragResponse.traceId,
+          caseId: ragResponse.caseId,
           feedback: {
             value: null,
             status: "idle",
@@ -126,7 +127,7 @@ export function useChat() {
       }
 
       try {
-        await sendFeedbackToRag({
+        const feedbackResponse = await sendFeedbackToRag({
           traceId,
           feedback,
           source: "chatbot-lia",
@@ -137,6 +138,7 @@ export function useChat() {
             value: feedback,
             status: "sent",
             error: undefined,
+            caseId: feedbackResponse.caseId,
           }),
         );
       } catch (unknownError) {

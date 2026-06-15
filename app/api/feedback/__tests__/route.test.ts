@@ -49,6 +49,7 @@ describe("POST /api/feedback", () => {
           trace_id: "trace-123",
           feedback: "useful",
           message: "Feedback registrado correctamente.",
+          case_id: "case-123",
         }),
         { status: 200, headers: { "Content-Type": "application/json" } },
       ),
@@ -84,6 +85,7 @@ describe("POST /api/feedback", () => {
       traceId: "trace-123",
       feedback: "useful",
       message: "Feedback registrado correctamente.",
+      caseId: "case-123",
     });
   });
 
