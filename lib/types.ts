@@ -29,15 +29,18 @@ export interface ChatMessage {
   caseId?: string;
   isInitial?: boolean;
   feedback?: FeedbackState;
+  createdAt?: string;
 }
 
 export interface ChatRequest {
   message: string;
+  conversationId?: string;
 }
 
 export interface ChatResponse {
   response: string;
   sources: Source[];
+  conversationId?: string;
   traceId?: string;
   caseId?: string;
 }
@@ -57,11 +60,31 @@ export interface FeedbackResponse {
   caseId?: string;
 }
 
+export interface ConversationMessage {
+  id: number;
+  role: ChatRole;
+  content: string;
+  traceId?: string;
+  caseId?: string;
+  sources: Source[];
+  createdAt: string;
+}
+
+export interface ConversationHistoryResponse {
+  conversationId: string;
+  status: "active" | "expired";
+  messageCount: number;
+  messages: ConversationMessage[];
+  expiresAt?: string;
+  message: string;
+}
+
 export interface RagSource {
   document_id: number;
   chunk_id: number;
   chunk_index: number;
   distance: number;
+  relevance_score?: number;
   title?: string;
   document_title?: string;
   fragment?: string;
@@ -72,6 +95,7 @@ export interface RagSource {
 export interface RagChatResponse {
   response: string;
   sources?: RagSource[];
+  conversation_id?: string | null;
   trace_id?: string;
   case_id?: string | null;
 }
@@ -82,4 +106,24 @@ export interface RagFeedbackResponse {
   feedback: FeedbackValue;
   message: string;
   case_id?: string | null;
+}
+
+export interface RagConversationMessage {
+  id: number;
+  role: ChatRole;
+  content: string;
+  trace_id?: string | null;
+  case_id?: string | null;
+  sources?: RagSource[];
+  safety?: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface RagConversationResponse {
+  conversation_id: string;
+  status: "active" | "expired";
+  message_count: number;
+  messages: RagConversationMessage[];
+  expires_at?: string | null;
+  message: string;
 }

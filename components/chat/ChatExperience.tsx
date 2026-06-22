@@ -10,11 +10,14 @@ export function ChatExperience() {
   return (
     <section className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px]">
       <ChatWindow
+        conversationId={chat.conversationId}
         messages={chat.messages}
-        isLoading={chat.isLoading}
+        isLoading={chat.isLoading || chat.isHistoryLoading}
+        isHistoryLoading={chat.isHistoryLoading}
         error={chat.error}
         onSendMessage={chat.sendMessage}
         onSubmitFeedback={chat.submitFeedback}
+        onStartNewConversation={chat.startNewConversation}
       />
       <SourcesPanel sources={chat.latestSources} />
     </section>

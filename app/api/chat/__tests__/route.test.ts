@@ -54,6 +54,7 @@ describe("POST /api/chat", () => {
               distance: 0.12,
             },
           ],
+          conversation_id: "550e8400-e29b-41d4-a716-446655440000",
           trace_id: "trace-123",
           case_id: "case-chat-123",
         }),
@@ -64,7 +65,10 @@ describe("POST /api/chat", () => {
     const request = new Request("http://localhost:3000/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "¿Cómo puedo organizarme mejor?" }),
+      body: JSON.stringify({
+        message: "¿Cómo puedo organizarme mejor?",
+        conversationId: "550e8400-e29b-41d4-a716-446655440000",
+      }),
     });
 
     const response = await POST(request);
@@ -79,7 +83,10 @@ describe("POST /api/chat", () => {
           "Content-Type": "application/json",
           "x-api-key": "test-api-key",
         },
-        body: JSON.stringify({ message: "¿Cómo puedo organizarme mejor?" }),
+        body: JSON.stringify({
+          message: "¿Cómo puedo organizarme mejor?",
+          conversation_id: "550e8400-e29b-41d4-a716-446655440000",
+        }),
       }),
     );
     expect(data).toEqual({
@@ -94,6 +101,7 @@ describe("POST /api/chat", () => {
           score: 0.12,
         },
       ],
+      conversationId: "550e8400-e29b-41d4-a716-446655440000",
       traceId: "trace-123",
       caseId: "case-chat-123",
     });

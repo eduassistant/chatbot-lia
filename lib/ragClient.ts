@@ -1,4 +1,4 @@
-import type { ChatRequest, ChatResponse } from "./types";
+import type { ChatRequest, ChatResponse, ConversationHistoryResponse } from "./types";
 
 export class RagClientError extends Error {
   status?: number;
@@ -20,7 +20,24 @@ function isChatResponse(value: unknown): value is ChatResponse {
   return (
     typeof response.response === "string" &&
     Array.isArray(response.sources) &&
+    (response.conversationId === undefined || typeof response.conversationId === "string") &&
     (response.traceId === undefined || typeof response.traceId === "string")
+  );
+}
+
+function isConversationHistoryResponse(value: unknown): value is ConversationHistoryResponse {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const response = value as Partial<ConversationHistoryResponse>;
+
+  return (
+    typeof response.conversationId === "string" &&
+    (response.status === "active" || response.status === "expired") &&
+    typeof response.messageCount === "number" &&
+    Array.isArray(response.messages) &&
+    typeof response.message === "string"
   );
 }
 
@@ -35,7 +52,10 @@ function getErrorMessage(payload: unknown, fallback: string) {
   return fallback;
 }
 
-export async function sendMessage(message: string): Promise<ChatResponse> {
+export async function sendMessage(
+  message: string,
+  conversationId?: string,
+): Promise<ChatResponse> {
   const trimmedMessage = message.trim();
 
   if (!trimmedMessage) {
@@ -44,6 +64,7 @@ export async function sendMessage(message: string): Promise<ChatResponse> {
 
   const requestPayload: ChatRequest = {
     message: trimmedMessage,
+    conversationId,
   };
 
   let response: Response;
@@ -77,6 +98,52 @@ export async function sendMessage(message: string): Promise<ChatResponse> {
 
   if (!isChatResponse(payload)) {
     throw new RagClientError("El RAG respondió con un formato inesperado.");
+  }
+
+  return payload;
+}
+
+export async function fetchConversationHistory(
+  conversationId: string,
+): Promise<ConversationHistoryResponse | null> {
+  const trimmedConversationId = conversationId.trim();
+
+  if (!trimmedConversationId) {
+    throw new RagClientError("conversationId es requerido para recuperar historial.");
+  }
+
+  let response: Response;
+
+  try {
+    response = await fetch(`/api/conversations/${trimmedConversationId}`, {
+      method: "GET",
+      cache: "no-store",
+    });
+  } catch {
+    throw new RagClientError("No pudimos recuperar el historial conversacional.");
+  }
+
+  let payload: unknown = null;
+
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
+  }
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new RagClientError(
+      getErrorMessage(payload, "No pudimos recuperar el historial conversacional."),
+      response.status,
+    );
+  }
+
+  if (!isConversationHistoryResponse(payload)) {
+    throw new RagClientError("El historial respondió con un formato inesperado.");
   }
 
   return payload;
