@@ -30,6 +30,15 @@ function getRequestMessage(payload: unknown): string | null {
   return message || null;
 }
 
+function getRequestConversationId(payload: unknown): string | undefined {
+  if (!isRecord(payload) || typeof payload.conversationId !== "string") {
+    return undefined;
+  }
+
+  const conversationId = payload.conversationId.trim();
+  return conversationId || undefined;
+}
+
 function getSourceTitle(source: RagSource) {
   return source.title || source.document_title || `Documento #${source.document_id}`;
 }
@@ -41,6 +50,10 @@ function getSourceFragment(source: RagSource) {
 function getSourceScore(source: RagSource) {
   if (typeof source.score === "number") {
     return source.score;
+  }
+
+  if (typeof source.relevance_score === "number") {
+    return source.relevance_score;
   }
 
   return source.distance;
@@ -81,6 +94,8 @@ function normalizeRagResponse(payload: unknown): ChatResponse | null {
   return {
     response: payload.response,
     sources,
+    conversationId:
+      typeof payload.conversation_id === "string" ? payload.conversation_id : undefined,
     traceId: typeof payload.trace_id === "string" ? payload.trace_id : undefined,
     caseId: typeof payload.case_id === "string" ? payload.case_id : undefined,
   };
@@ -123,6 +138,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "El mensaje no puede estar vacío." }, { status: 400 });
   }
 
+  const conversationId = getRequestConversationId(requestPayload);
   const { apiUrl, apiKey } = getRagConfig();
 
   if (!apiUrl || !apiKey) {
@@ -138,7 +154,7 @@ export async function POST(request: Request) {
   let ragResponse: Response;
 
   try {
-    const payload: ChatRequest = { message };
+    const payload: ChatRequest = { message, conversationId };
 
     ragResponse = await fetch(`${apiUrl}/chat`, {
       method: "POST",
@@ -146,7 +162,10 @@ export async function POST(request: Request) {
         "Content-Type": "application/json",
         "x-api-key": apiKey,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        message: payload.message,
+        conversation_id: payload.conversationId,
+      }),
       cache: "no-store",
     });
   } catch {

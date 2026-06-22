@@ -1,9 +1,17 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { sendFeedback as sendFeedbackToRag } from "@/lib/feedbackClient";
-import { sendMessage as sendMessageToRag } from "@/lib/ragClient";
-import type { ChatMessage, FeedbackValue, Source } from "@/lib/types";
+import {
+  fetchConversationHistory,
+  sendMessage as sendMessageToRag,
+} from "@/lib/ragClient";
+import {
+  getOrCreateConversationId,
+  persistConversationId,
+  resetStoredConversationId,
+} from "@/lib/conversationSession";
+import type { ChatMessage, ConversationHistoryResponse, FeedbackValue, Source } from "@/lib/types";
 
 const initialMessages: ChatMessage[] = [
   {
@@ -17,6 +25,32 @@ const initialMessages: ChatMessage[] = [
 
 function createMessageId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function buildMessagesFromHistory(history: ConversationHistoryResponse): ChatMessage[] {
+  if (!history.messages.length) {
+    return initialMessages;
+  }
+
+  return [
+    ...initialMessages,
+    ...history.messages.map<ChatMessage>((message) => ({
+      id: `history-${message.id}`,
+      role: message.role,
+      content: message.content,
+      sources: message.sources,
+      traceId: message.traceId,
+      caseId: message.caseId,
+      createdAt: message.createdAt,
+      feedback:
+        message.role === "assistant"
+          ? {
+              value: null,
+              status: "idle",
+            }
+          : undefined,
+    })),
+  ];
 }
 
 function updateAssistantFeedback(
@@ -41,9 +75,54 @@ function updateAssistantFeedback(
 }
 
 export function useChat() {
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadConversationHistory() {
+      const nextConversationId = getOrCreateConversationId();
+      setConversationId(nextConversationId);
+      setIsHistoryLoading(true);
+
+      try {
+        const history = await fetchConversationHistory(nextConversationId);
+
+        if (!isMounted) {
+          return;
+        }
+
+        if (history) {
+          setMessages(buildMessagesFromHistory(history));
+        }
+      } catch (unknownError) {
+        if (!isMounted) {
+          return;
+        }
+
+        const errorMessage =
+          unknownError instanceof Error
+            ? unknownError.message
+            : "No pudimos recuperar el historial conversacional.";
+
+        setError(errorMessage);
+      } finally {
+        if (isMounted) {
+          setIsHistoryLoading(false);
+        }
+      }
+    }
+
+    void loadConversationHistory();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const latestSources = useMemo<Source[]>(() => {
     const lastAssistantWithSources = [...messages]
@@ -57,9 +136,12 @@ export function useChat() {
     async (message: string) => {
       const trimmedMessage = message.trim();
 
-      if (!trimmedMessage || isLoading) {
+      if (!trimmedMessage || isLoading || isHistoryLoading) {
         return;
       }
+
+      const activeConversationId = conversationId ?? getOrCreateConversationId();
+      setConversationId(activeConversationId);
 
       const userMessage: ChatMessage = {
         id: createMessageId(),
@@ -72,7 +154,12 @@ export function useChat() {
       setError(null);
 
       try {
-        const ragResponse = await sendMessageToRag(trimmedMessage);
+        const ragResponse = await sendMessageToRag(trimmedMessage, activeConversationId);
+
+        if (ragResponse.conversationId) {
+          persistConversationId(ragResponse.conversationId);
+          setConversationId(ragResponse.conversationId);
+        }
 
         const assistantMessage: ChatMessage = {
           id: createMessageId(),
@@ -99,7 +186,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [isLoading],
+    [conversationId, isHistoryLoading, isLoading],
   );
 
   const submitFeedback = useCallback(
@@ -159,12 +246,22 @@ export function useChat() {
     [messages],
   );
 
+  const startNewConversation = useCallback(() => {
+    const nextConversationId = resetStoredConversationId();
+    setConversationId(nextConversationId);
+    setMessages(initialMessages);
+    setError(null);
+  }, []);
+
   return {
+    conversationId,
     messages,
     latestSources,
     isLoading,
+    isHistoryLoading,
     error,
     sendMessage,
     submitFeedback,
+    startNewConversation,
   };
 }

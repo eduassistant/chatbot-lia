@@ -780,3 +780,60 @@ npm run lint
 npm run build
 npm test
 ```
+
+---
+
+## 50) Historial conversacional anónimo
+
+Esta feature integra `chatbot-lia` con la issue `#50` de `rag-lia`, permitiendo mantener y recuperar una sesión conversacional anónima mediante un `conversationId` persistido en el navegador.
+
+Objetivo:
+
+- generar un UUID anónimo en el primer uso del chat;
+- persistirlo en `localStorage`;
+- enviarlo al backend RAG como `conversation_id`;
+- recuperar historial al volver a abrir el chatbot;
+- permitir iniciar una nueva conversación;
+- no exponer `RAG_API_KEY` al navegador.
+
+Flujo esperado:
+
+```text
+Usuario abre chatbot
+→ chatbot-lia obtiene o genera conversationId
+→ GET /api/conversations/{conversationId}
+→ rag-lia devuelve historial si existe
+→ usuario envía mensaje
+→ POST /api/chat incluye conversation_id
+→ rag-lia guarda user/assistant y devuelve conversation_id
+```
+
+Rutas internas nuevas o actualizadas:
+
+```http
+POST /api/chat
+GET /api/conversations/{conversationId}
+```
+
+La ruta `/api/chat` normaliza `conversationId` del front a `conversation_id` para `rag-lia`.
+
+Archivos principales:
+
+```text
+app/api/chat/route.ts
+app/api/conversations/[conversationId]/route.ts
+hooks/useChat.ts
+lib/conversationSession.ts
+lib/ragClient.ts
+lib/types.ts
+components/chat/ChatExperience.tsx
+components/chat/ChatWindow.tsx
+```
+
+Validación local:
+
+```bash
+npm run lint
+npm run build
+npm test
+```
