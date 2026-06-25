@@ -837,3 +837,31 @@ npm run lint
 npm run build
 npm test
 ```
+
+## Issue #51 — Carga documental desde interfaz
+
+Se agregó una interfaz de carga documental para alimentar el RAG desde `chatbot-lia`.
+
+Características:
+
+- componente `DocumentUploadPanel` con selector de archivos y drag & drop;
+- validación frontend para PDF, TXT, Markdown (`.md`) y Word/DOCX;
+- límite inicial de 10 MB por archivo;
+- endpoint server-side `POST /api/documents/upload` que reenvía el archivo a `rag-lia` sin exponer `RAG_API_KEY` en el navegador;
+- estados visuales de carga, éxito y error;
+- resumen del documento indexado con `documentId`, nombre y cantidad de chunks.
+
+Variables privadas requeridas:
+
+```env
+RAG_API_URL=http://127.0.0.1:8000
+RAG_API_KEY=changeme
+```
+
+Prueba manual:
+
+1. Levantar `rag-lia`.
+2. Levantar `chatbot-lia`.
+3. Usar el panel **Carga documental**.
+4. Cargar un archivo `.pdf`, `.txt`, `.md` o `.docx`.
+5. Verificar que la UI muestre `Documento indexado correctamente`.
