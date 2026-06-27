@@ -127,3 +127,27 @@ export interface RagConversationResponse {
   expires_at?: string | null;
   message: string;
 }
+
+export type DocumentUploadStatus = "idle" | "uploading" | "success" | "error";
+
+export interface DocumentUploadResponse {
+  documentId: number;
+  title: string;
+  filename: string;
+  contentType?: string | null;
+  extension: string;
+  chunksCount: number;
+  status: "indexed";
+  message: string;
+}
+
+export interface RagDocumentUploadResponse {
+  document_id: number;
+  title: string;
+  filename: string;
+  content_type?: string | null;
+  extension: string;
+  chunks_count: number;
+  status: "indexed";
+  message: string;
+}

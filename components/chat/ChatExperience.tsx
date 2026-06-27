@@ -1,6 +1,7 @@
 "use client";
 
 import { useChat } from "@/hooks/useChat";
+import { DocumentUploadPanel } from "@/components/documents/DocumentUploadPanel";
 import { SourcesPanel } from "@/components/sources/SourcesPanel";
 import { ChatWindow } from "./ChatWindow";
 
@@ -19,7 +20,10 @@ export function ChatExperience() {
         onSubmitFeedback={chat.submitFeedback}
         onStartNewConversation={chat.startNewConversation}
       />
-      <SourcesPanel sources={chat.latestSources} />
+      <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+        <DocumentUploadPanel />
+        <SourcesPanel sources={chat.latestSources} />
+      </div>
     </section>
   );
 }
