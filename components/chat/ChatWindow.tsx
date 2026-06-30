@@ -36,7 +36,7 @@ export function ChatWindow({
   onStartNewConversation,
 }: ChatWindowProps) {
   return (
-    <section className="flex min-h-[calc(100vh-150px)] flex-col rounded-2xl border border-border bg-white shadow-soft">
+    <section className="flex min-h-[calc(100vh-150px)] flex-col rounded-2xl border border-border bg-white shadow-soft lg:h-full lg:min-h-0">
       <div className="border-b border-border px-5 py-5 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -56,7 +56,7 @@ export function ChatWindow({
         </div>
       </div>
 
-      <div className="scrollbar-thin-soft flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+      <div className="scrollbar-thin-soft min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
         {isHistoryLoading ? (
           <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
             Recuperando historial conversacional anónimo...
