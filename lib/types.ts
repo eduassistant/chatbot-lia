@@ -151,3 +151,95 @@ export interface RagDocumentUploadResponse {
   status: "indexed";
   message: string;
 }
+export type DocumentLibraryStatus = "indexed" | "empty";
+
+export type DocumentLibraryExtension = "txt" | "md" | "pdf" | "docx";
+
+export interface DocumentLibraryItem {
+  documentId: number;
+  title: string;
+  source: string;
+  filename?: string | null;
+  extension?: string | null;
+  status: DocumentLibraryStatus;
+  chunksCount: number;
+  contentChars: number;
+  createdAt: string;
+}
+
+export interface DocumentLibraryListResponse {
+  items: DocumentLibraryItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface DocumentChunkPreview {
+  chunkId: number;
+  chunkIndex: number;
+  contentPreview: string;
+  createdAt: string;
+}
+
+export interface DocumentLibraryDetail extends DocumentLibraryItem {
+  contentPreview: string;
+  chunks: DocumentChunkPreview[];
+}
+
+export interface DocumentReindexResponse {
+  documentId: number;
+  title: string;
+  source: string;
+  status: DocumentLibraryStatus;
+  chunksCount: number;
+  message: string;
+}
+
+export interface DocumentLibraryFilters {
+  query?: string;
+  status?: DocumentLibraryStatus | "";
+  extension?: DocumentLibraryExtension | "";
+  limit?: number;
+  offset?: number;
+}
+
+export interface RagDocumentLibraryItem {
+  document_id: number;
+  title: string;
+  source: string;
+  filename?: string | null;
+  extension?: string | null;
+  status: DocumentLibraryStatus;
+  chunks_count: number;
+  content_chars: number;
+  created_at: string;
+}
+
+export interface RagDocumentLibraryListResponse {
+  items: RagDocumentLibraryItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface RagDocumentChunkPreview {
+  chunk_id: number;
+  chunk_index: number;
+  content_preview: string;
+  created_at: string;
+}
+
+export interface RagDocumentLibraryDetail extends RagDocumentLibraryItem {
+  content_preview: string;
+  chunks: RagDocumentChunkPreview[];
+}
+
+export interface RagDocumentReindexResponse {
+  document_id: number;
+  title: string;
+  source: string;
+  status: DocumentLibraryStatus;
+  chunks_count: number;
+  message: string;
+}
+

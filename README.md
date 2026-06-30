@@ -865,3 +865,43 @@ Prueba manual:
 3. Usar el panel **Carga documental**.
 4. Cargar un archivo `.pdf`, `.txt`, `.md` o `.docx`.
 5. Verificar que la UI muestre `Documento indexado correctamente`.
+
+## Issue #52 — Biblioteca documental y estado de ingesta
+
+Se agregó una interfaz de biblioteca documental para administrar documentos ya indexados en el RAG desde `chatbot-lia`.
+
+Características:
+
+- componente `DocumentLibraryPanel` integrado en el panel lateral junto a la carga documental;
+- listado paginado de documentos persistidos en `rag-lia`;
+- filtros por búsqueda (`query`), estado (`indexed` / `empty`) y extensión (`txt`, `md`, `pdf`, `docx`);
+- endpoint server-side `GET /api/documents` que consulta `GET /documents` en `rag-lia` sin exponer `RAG_API_KEY` en el navegador;
+- endpoint server-side `GET /api/documents/[documentId]` para consultar detalle, preview y chunks;
+- endpoint server-side `POST /api/documents/[documentId]/reindex` para solicitar reindexado manual;
+- normalización de respuestas snake_case del backend a camelCase para el frontend;
+- estados visuales de carga, error, filtros activos, detalle seleccionado y reindexado.
+
+Variables privadas requeridas:
+
+```env
+RAG_API_URL=http://127.0.0.1:8000
+RAG_API_KEY=changeme
+```
+
+Prueba manual:
+
+1. Levantar `rag-lia` con la feature backend de la issue #52.
+2. Levantar `chatbot-lia`.
+3. Verificar que el panel **Biblioteca documental** liste documentos.
+4. Probar filtros por búsqueda, estado y extensión.
+5. Abrir el detalle de un documento y verificar preview/chunks.
+6. Ejecutar **Reindexar** sobre un documento existente y confirmar mensaje de éxito.
+
+Validación local:
+
+```bash
+npm run lint
+npm run build
+npm test
+```
+
