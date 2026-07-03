@@ -905,3 +905,31 @@ npm run build
 npm test
 ```
 
+## Issue #53 — Panel admin de observabilidad
+
+`chatbot-lia` incorpora una vista simple de observabilidad administrativa conectada a los endpoints `/admin` de `rag-lia`.
+
+### Funcionalidad
+
+- Pestaña de feedback recibido por los usuarios.
+- Pestaña de trazas RAG con fuentes, scores, safety y latencia.
+- Pestaña de casos sensibles/escalados.
+- Filtros por búsqueda, fechas, estado/feedback, riesgo y tipo/origen.
+- Paginación independiente por vista.
+- Proxy server-side seguro para no exponer `RAG_API_KEY` en el navegador.
+
+### Rutas internas
+
+- `GET /api/admin/feedback`
+- `GET /api/admin/rag-traces`
+- `GET /api/admin/cases`
+
+Estas rutas llaman a `rag-lia` agregando `x-api-key` y `x-admin-role: admin` desde el servidor Next.js.
+
+### Variables requeridas
+
+```env
+RAG_API_URL=http://127.0.0.1:8000
+RAG_API_KEY=changeme
+```
+
