@@ -1,6 +1,7 @@
 "use client";
 
 import { useChat } from "@/hooks/useChat";
+import { AdminObservabilityPanel } from "@/components/admin/AdminObservabilityPanel";
 import { DocumentLibraryPanel } from "@/components/documents/DocumentLibraryPanel";
 import { DocumentUploadPanel } from "@/components/documents/DocumentUploadPanel";
 import { SourcesPanel } from "@/components/sources/SourcesPanel";
@@ -22,6 +23,7 @@ export function ChatExperience() {
         onStartNewConversation={chat.startNewConversation}
       />
       <div className="space-y-6 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:pr-2">
+        <AdminObservabilityPanel />
         <DocumentUploadPanel />
         <DocumentLibraryPanel />
         <SourcesPanel sources={chat.latestSources} />

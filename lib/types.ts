@@ -243,3 +243,140 @@ export interface RagDocumentReindexResponse {
   message: string;
 }
 
+export type AdminObservabilityView = "feedback" | "rag-traces" | "cases";
+
+export interface AdminPaginationResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface AdminObservabilityFilters {
+  page?: number;
+  pageSize?: number;
+  query?: string;
+  createdFrom?: string;
+  createdTo?: string;
+  feedback?: string;
+  source?: string;
+  user?: string;
+  status?: string;
+  riskLevel?: string;
+  triggerSource?: string;
+  eventType?: string;
+}
+
+export interface AdminFeedbackItem {
+  id: number;
+  traceId: string | null;
+  feedback: string;
+  comment?: string | null;
+  source?: string | null;
+  userIdentifier?: string | null;
+  question?: string | null;
+  responsePreview?: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface AdminRagTraceItem {
+  id: number;
+  traceId: string;
+  status: string;
+  question?: string | null;
+  responsePreview?: string | null;
+  riskLevel?: string | null;
+  recommendedAction?: string | null;
+  escalationRequired: boolean;
+  sourcesCount: number;
+  retrievalCount: number;
+  durationMs: number;
+  llmProvider?: string | null;
+  llmModel?: string | null;
+  errorType?: string | null;
+  errorMessage?: string | null;
+  retrievedChunks: Array<Record<string, unknown>>;
+  sources: Array<Record<string, unknown>>;
+  safety: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface AdminCaseItem {
+  id: number;
+  caseId: string;
+  traceId?: string | null;
+  feedbackId?: number | null;
+  triggerSource: string;
+  status: string;
+  riskLevel?: string | null;
+  recommendedAction?: string | null;
+  reason: string;
+  resolutionNote?: string | null;
+  safety: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RagAdminFeedbackItem {
+  id: number;
+  trace_id?: string | null;
+  feedback: string;
+  comment?: string | null;
+  source?: string | null;
+  user_identifier?: string | null;
+  question?: string | null;
+  response_preview?: string | null;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface RagAdminTraceItem {
+  id: number;
+  trace_id: string;
+  status: string;
+  question?: string | null;
+  response_preview?: string | null;
+  risk_level?: string | null;
+  recommended_action?: string | null;
+  escalation_required: boolean;
+  sources_count: number;
+  retrieval_count: number;
+  duration_ms: number;
+  llm_provider?: string | null;
+  llm_model?: string | null;
+  error_type?: string | null;
+  error_message?: string | null;
+  retrieved_chunks?: Array<Record<string, unknown>>;
+  sources?: Array<Record<string, unknown>>;
+  safety?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface RagAdminCaseItem {
+  id: number;
+  case_id: string;
+  trace_id?: string | null;
+  feedback_id?: number | null;
+  trigger_source: string;
+  status: string;
+  risk_level?: string | null;
+  recommended_action?: string | null;
+  reason: string;
+  resolution_note?: string | null;
+  safety?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RagAdminListResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
